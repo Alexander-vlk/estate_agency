@@ -33,30 +33,67 @@ async def root(request: Request):
 async def systems(request: Request):
     """Получение списка всех систем"""
     with get_db_connection() as conn:
-        clients_sql = conn.execute("SELECT * FROM Client").fetchall()
+        clients_sql = conn.execute(
+            """
+            SELECT 
+                c.id id,
+                c.fio fio,
+                c.money money,
+                c.town town,
+                a.name name
+            FROM Client c
+            JOIN Agency a ON a.id = c.agency
+            """
+        ).fetchall()
 
         clients = [dict(client) for client in clients_sql]
+
+    with get_db_connection() as conn:
+        agency_sql = conn.execute(
+            """
+            SELECT * FROM Agency
+            """
+        ).fetchall()
+
+        agency = [dict(agency) for agency in agency_sql]
 
     context = {
         'request': request,
         'clients': clients,
+        'agencies': agency,
     }
 
     return templates.TemplateResponse("clients.html", context)
 
 
+@app.post('/clients/{client_id}/delete', response_class=RedirectResponse)
+async def delete_system(request: Request, client_id: int):
+    """Удаление системы"""
+    with get_db_connection() as conn:
+        conn.execute(
+            '''
+            delete from Client where id = ?
+            ''',
+            (client_id,)
+        )
+
+        conn.commit()
+
+    return RedirectResponse('/clients', status_code=303)
+
+
 @app.post("/clients", response_class=RedirectResponse)
 async def create_client(
         fio: str = Form(...),
-        money: float = Form(...),
-        town: int = Form(...),
+        money: int = Form(...),
+        town: str = Form(...),
         agency: str = Form(...),
     ):
 
     with get_db_connection() as conn:
         conn.execute(
             '''
-            insert into systems (name, diameter, age, galaxy)
+            insert into Client (fio, money, town, agency)
             values (?, ?, ?, ?)
             ''',
             (fio, money, town, agency)
