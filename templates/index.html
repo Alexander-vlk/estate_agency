@@ -1,7 +1,31 @@
 {% extends 'base.html' %}
 
 {% block title %}
+Главная
 {% endblock %}
 
 {% block content %}
+<header>
+    <h1>
+        Агентство недвижимости
+    </h1>
+    <nav>
+        <ul>
+            <li><a class="btn" href="clients/">Клиенты</a></li>
+            <li><a class="btn" href="estates/">Недвижимость</a></li>
+        </ul>
+    </nav>
+</header>
+<section>
+    {% for agency in agencies %}
+        <article class="agency-card">
+            <h2>{{ agency.name }}</h2>
+            <p class="descr">{{ agency.descr }}</p>
+            <p class="created">
+                <span>Дата создания: </span>
+                <span>{{ agency.created_at }}</span>
+            </p>
+        </article>
+    {% endfor %}
+</section>
 {% endblock %}
