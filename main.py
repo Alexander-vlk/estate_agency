@@ -8,15 +8,13 @@ from xml.etree import ElementTree as XML
 
 from utils import get_db_connection
 
+
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
 
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    """Корневая страница"""
+    return templates.TemplateResponse("index.html", {"request": request})
