@@ -150,3 +150,17 @@ input[type="submit"], select {
     margin: 4px 0;
 }
 
+#xml {
+    display: block;
+    background-color: var(--green);
+    color: var(--white);
+    text-align: center;
+    padding: 1rem 0;
+    transition: all var(--transition);
+    border-radius: var(--rounded-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+#xml:hover {
+    background-color: var(--dark-green);
+}

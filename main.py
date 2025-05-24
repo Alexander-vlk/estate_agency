@@ -214,3 +214,64 @@ async def create_client(
         conn.commit()
 
     return RedirectResponse('/estates', status_code=303)
+
+
+@app.get("/estates/xml")
+def download_xml():
+    """Получение данных в формате XML"""
+    with get_db_connection() as conn:
+        data_sql = conn.execute(
+            '''
+                SELECT 
+                    e.id id,
+                    a.name agency,
+                    e.name name,
+                    e.address address,
+                    e.square square,
+                    e.rooms_cnt rooms_cnt,
+                    e.posted_at posted_at,
+                    etype.name type
+                FROM Estate e
+                JOIN Agency a ON a.id = e.agency
+                JOIN EstateType etype ON etype.id = e.type
+            '''
+        ).fetchall()
+        data = [dict(data) for data in data_sql]
+
+    xml_root = XML.Element("items")
+
+    for raw in data:
+        item_el = XML.SubElement(xml_root, "item")
+        for key, value in raw.items():
+            XML.SubElement(item_el, key).text = str(value)
+
+    xml_data = XML.tostring(xml_root, encoding="utf-8")
+    return Response(content=xml_data, media_type='application/xml')
+
+
+@app.post("/xml/estates/upload")
+def upload_xml(file: UploadFile = File(...)):
+    """Загрузка и сохранение в таблицу данных о системах из XML"""
+    contents = file.file.read()
+    tree = XML.parse(BytesIO(contents))
+    root_node = tree.getroot()
+
+    with get_db_connection() as conn:
+        for item in root_node.findall("item"):
+            name = item.find("name").text
+            diameter = item.find("diameter").text
+            age = item.find("age").text
+            galaxy = item.find("galaxy").text
+            description = item.find("description").text
+
+            conn.execute(
+                '''
+                INSERT INTO systems (name, diameter, age, galaxy, description)
+                VALUES (?, ?, ?, ?, ?)
+                ''',
+                (name, diameter, age, galaxy, description)
+            )
+
+            conn.commit()
+
+    return {"message": "Success"}
