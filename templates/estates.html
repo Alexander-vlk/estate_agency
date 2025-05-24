@@ -34,15 +34,15 @@
                 <input type="text" name="address" id="address" placeholder="Адрес">
             </div>
             <div>
-                <input type="text" name="square" id="square" min="1" placeholder="Площадь">
+                <input type="number" name="square" id="square" min="1" placeholder="Площадь">
             </div>
             <div>
-                <input type="text" name="rooms_cnt" id="rooms_cnt" min="1" placeholder="Количество помещений">
+                <input type="number" name="rooms_cnt" id="rooms_cnt" min="1" placeholder="Количество помещений">
             </div>
             <div>
                 <select name="type" id="type">
                     {% for type in types %}
-                    <option value="{{ agency.id }}">{{ type.name }}</option>
+                    <option value="{{ type.id }}">{{ type.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -59,13 +59,16 @@
         </form>
     </section>
     <section class="clients">
-        {% for client in clients %}
+        {% for estate in estates %}
             <article class="client-card">
-                <h3 class="client-name">{{ client.fio }}</h3>
-                <p class="client-money">Счет: {{ client.money }}</p>
-                <p class="client-town">Город: {{ client.town }}</p>
-                <p class="client-agency">Агентство: {{ client.name }}</p>
-                <form action="/clients/{{ client.id }}/delete" method="post">
+                <h3 class="client-name">{{ estate.name }}</h3>
+                <p class="client-money">Адрес: {{ estate.address }}</p>
+                <p class="client-town">Тип недвижимости: {{ estate.type }}</p>
+                <p class="client-town">Площадь: {{ estate.square }}</p>
+                <p class="client-town">Кол-во помещений: {{ estate.rooms_cnt }}</p>
+                <p class="client-agency">Агентство: {{ estate.name }}</p>
+                <p class="client-agency">Дата публикации: {{ estate.posted_at }}</p>
+                <form action="/estates/{{ estate.id }}/delete" method="post">
                     <input type="submit" value="Удалить" class="btn-danger">
                 </form>
             </article>
