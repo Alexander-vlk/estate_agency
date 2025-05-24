@@ -28,6 +28,41 @@ async def root(request: Request):
     }
     return templates.TemplateResponse("index.html", context)
 
+@app.post("/", response_class=RedirectResponse)
+async def create_client(
+        name: str = Form(...),
+        descr: str = Form(...),
+    ):
+
+    with get_db_connection() as conn:
+        conn.execute(
+            '''
+            insert into Agency (name, descr)
+            values (?, ?)
+            ''',
+            (name, descr)
+        )
+
+        conn.commit()
+
+    return RedirectResponse('/', status_code=303)
+
+
+@app.post('/agencies/{agency_id}/delete', response_class=RedirectResponse)
+async def delete_system(request: Request, agency_id: int):
+    """Удаление системы"""
+    with get_db_connection() as conn:
+        conn.execute(
+            '''
+            delete from Agency where id = ?
+            ''',
+            (agency_id,)
+        )
+
+        conn.commit()
+
+    return RedirectResponse('/', status_code=303)
+
 
 @app.get("/clients", response_class=HTMLResponse)
 async def systems(request: Request):

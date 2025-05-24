@@ -17,6 +17,18 @@
     </nav>
 </header>
 <section>
+    <form action="" method="post">
+    <h2>Создать агентство</h2>
+    <div>
+        <input type="text" name="name" id="name" placeholder="Название">
+    </div>
+    <div>
+        <input type="text" name="descr" id="descr" placeholder="Описание">
+    </div>
+    <div>
+        <input type="submit" value="Сохранить" class="btn">
+    </div>
+</form>
     {% for agency in agencies %}
         <article class="agency-card">
             <h2>{{ agency.name }}</h2>
@@ -25,6 +37,9 @@
                 <span>Дата создания: </span>
                 <span>{{ agency.created_at }}</span>
             </p>
+            <form action="/agencies/{{ agency.id }}/delete" method="post">
+                <input type="submit" value="Удалить" class="btn-danger">
+            </form>
         </article>
     {% endfor %}
 </section>
