@@ -14,4 +14,62 @@
         </ul>
     </nav>
 </header>
+<main>
+<section>
+        <form action="/estatetypes/" method="post">
+            <h2>Создать тип недвижимости</h2>
+            <div>
+                <input type="text" name="name" id="typeName" placeholder="Название">
+            </div>
+            <div>
+                <input type="submit" value="Сохранить" class="btn">
+            </div>
+        </form>
+        <form action="" method="post">
+            <h2>Создать запись о недвижимости</h2>
+            <div>
+                <input type="text" name="name" id="estateName" placeholder="Название">
+            </div>
+            <div>
+                <input type="text" name="address" id="address" placeholder="Адрес">
+            </div>
+            <div>
+                <input type="text" name="square" id="square" min="1" placeholder="Площадь">
+            </div>
+            <div>
+                <input type="text" name="rooms_cnt" id="rooms_cnt" min="1" placeholder="Количество помещений">
+            </div>
+            <div>
+                <select name="type" id="type">
+                    {% for type in types %}
+                    <option value="{{ agency.id }}">{{ type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <select name="agency" id="agency">
+                    {% for agency in agencies %}
+                    <option value="{{ agency.id }}">{{ agency.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <input type="submit" value="Сохранить" class="btn">
+            </div>
+        </form>
+    </section>
+    <section class="clients">
+        {% for client in clients %}
+            <article class="client-card">
+                <h3 class="client-name">{{ client.fio }}</h3>
+                <p class="client-money">Счет: {{ client.money }}</p>
+                <p class="client-town">Город: {{ client.town }}</p>
+                <p class="client-agency">Агентство: {{ client.name }}</p>
+                <form action="/clients/{{ client.id }}/delete" method="post">
+                    <input type="submit" value="Удалить" class="btn-danger">
+                </form>
+            </article>
+        {% endfor %}
+    </section>
+</main>
 {% endblock %}
