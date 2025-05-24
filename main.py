@@ -105,16 +105,112 @@ async def create_client(
 
 
 @app.get("/estates", response_class=HTMLResponse)
-async def systems(request: Request):
+async def estates(request: Request):
     """Получение списка всех систем"""
     with get_db_connection() as conn:
-        estates_sql = conn.execute("SELECT * FROM Estate").fetchall()
+        estates_sql = conn.execute(
+            """
+                SELECT 
+                    e.id id,
+                    a.name agency,
+                    e.name name,
+                    e.address address,
+                    e.square square,
+                    e.rooms_cnt rooms_cnt,
+                    e.posted_at posted_at,
+                    etype.name type
+                FROM Estate e
+                JOIN Agency a ON a.id = e.agency
+                JOIN EstateType etype ON etype.id = e.type
+            """
+        ).fetchall()
 
         estates = [dict(estate) for estate in estates_sql]
+
+    with get_db_connection() as conn:
+        agency_sql = conn.execute(
+            """
+            SELECT * FROM Agency
+            """
+        ).fetchall()
+
+        agency = [dict(agency) for agency in agency_sql]
+
+    with get_db_connection() as conn:
+        estates_sql = conn.execute(
+            """
+            SELECT 
+                *
+            FROM EstateType e
+            """
+        ).fetchall()
+
+        types = [dict(estate_type) for estate_type in estates_sql]
 
     context = {
         'request': request,
         'estates': estates,
+        'agencies': agency,
+        'types': types,
     }
 
     return templates.TemplateResponse("estates.html", context)
+
+
+@app.post("/estates", response_class=RedirectResponse)
+async def create_client(
+        name: str = Form(...),
+        address: str = Form(...),
+        square: int = Form(...),
+        agency: int = Form(...),
+        type: int = Form(...),
+        rooms_cnt: int = Form(...),
+    ):
+
+    with get_db_connection() as conn:
+        conn.execute(
+            '''
+            insert into Estate (name, address, agency, square, type, rooms_cnt)
+            values (?, ?, ?, ?, ?, ?)
+            ''',
+            (name, address, agency, square, type, rooms_cnt)
+        )
+
+        conn.commit()
+
+    return RedirectResponse('/estates', status_code=303)
+
+
+@app.post('/estates/{estate_id}/delete', response_class=RedirectResponse)
+async def delete_estate(request: Request, estate_id: int):
+    """Удаление системы"""
+    with get_db_connection() as conn:
+        conn.execute(
+            '''
+            delete from Estate where id = ?
+            ''',
+            (estate_id,)
+        )
+
+        conn.commit()
+
+    return RedirectResponse('/estates', status_code=303)
+
+
+@app.post("/estatetypes/", response_class=RedirectResponse)
+async def create_client(
+        name: str = Form(...),
+    ):
+
+    with get_db_connection() as conn:
+        conn.execute(
+            '''
+            insert into EstateType (name)
+            values (?)
+            ''',
+            (name, )
+        )
+
+        conn.commit()
+
+    return RedirectResponse('/estates', status_code=303)
